@@ -50,8 +50,15 @@ def main(year):
 
     final_df = pd.concat(dataframes, ignore_index=True)
     
+    # Vérifier si le dossier existe, sinon le créer
+    wip_folder_path = '/content/drive/MyDrive/02 - Work/02 - Padel Mag/02 - WIP'
+
+    if not os.path.exists(wip_folder_path):
+        os.makedirs(wip_folder_path, exist_ok=True)
+
+    # Chemin complet du fichier de sortie
+    output_filepath = f'{wip_folder_path}/db_{year}.parquet'
     # Chargement final dans le fichier dédié
-    output_filepath = f'/content/drive/MyDrive/02 - Work/02 - Padel Mag/02 - WIP/db_{year}.parquet'
     save_to_parquet(final_df, output_filepath,schema_type)
 
 if __name__ == "__main__":
