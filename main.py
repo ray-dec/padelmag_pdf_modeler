@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-import pdfplumber
 import re, os, sys
 
 # Chemin vers les scripts spécifiques au projet
