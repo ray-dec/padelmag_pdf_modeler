@@ -1,13 +1,15 @@
 import pdfplumber
 import os
 import re
+import urllib3
 import urllib.request
 from bs4 import BeautifulSoup
 import requests
 
 def download_pdf_padel(categorie,folder_path):
+    urllib3.disable_warnings()
     url_page = 'https://www.fft.fr/competition/padel/le-classement-padel'
-    response = requests.get(url_page)
+    response = requests.get(url_page,verify=False)
     soup = BeautifulSoup(response.text, 'html.parser')
     
     for a in soup.find_all('a', href=True):
@@ -15,7 +17,7 @@ def download_pdf_padel(categorie,folder_path):
             filename = a.get_text(strip=True) + '.pdf'
             try:
                 urllib.request.urlretrieve(a['href'], folder_path+filename)
-                print(f'Le fichier {filename} a bien été téléchargé depuis le site {url_page}')
+                print(f'Le fichier {filename} a bien été téléchargé depuis le site {url_page}\n')
             except Exception as e:
                 print(f"Erreur lors du téléchargement : {e}")
             break

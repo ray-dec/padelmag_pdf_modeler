@@ -37,14 +37,14 @@ def main() :
 
             if os.path.exists(folder_path+'raw/'+filename):
                 os.remove(file_path)
-                print(f'Le fichier {filename} a déjà été intégré.')
+                print(f'Le fichier {filename} a déjà été intégré.\n')
 
             else :        
-                print(f'Traitement du fichier {filename}')
+                print(f"Traitement du fichier {filename}.\nVeuillez patienter... Ne quittez pas l'application !\n")
 
                 # Extraction depuis les fichiers PDFs 
                 all_tables = extract_data_from_tables(file_path)
-                print("Fin de l'extraction des données depuis le PDF. \nLancement du cleaning...")
+                print("Fin de l'extraction des données depuis le PDF. \nLancement du cleaning...\n")
 
                 # Modification des tables
                 df = header_and_data_cleansing(all_tables[0], all_tables[1:])
@@ -62,7 +62,7 @@ def main() :
 
                 if not os.path.exists(folder_path+'raw/'):
                     os.makedirs(folder_path+'raw/', exist_ok=True)
-                print(f"Fin du cleaning. Le fichier PDF a été archivé dans{folder_path+'raw/'}")
+                print(f"Fin du cleaning. Le fichier PDF a été archivé dans {folder_path+'raw/'}\n")
                 os.replace(file_path,folder_path+'raw/'+filename)
     
     
@@ -74,9 +74,7 @@ def main() :
     # Chargement final dans le fichier dédié
     output_filepath = folder_path+'database.parquet'
     save_to_parquet(final_df, output_filepath,schema_type)
+    print("\n Vous pouvez à présent fermer l'application.")
 
 if __name__ == "__main__":
     main()
-
-
-

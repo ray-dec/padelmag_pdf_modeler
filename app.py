@@ -17,17 +17,12 @@ class Redirector(io.TextIOBase):
         pass
 
 def run_script():
-    # Redirection des sorties de subprocess
-    process = subprocess.Popen(
+    # Installation des dépendances sans afficher les sorties dans l'interface Tkinter
+    subprocess.Popen(
         [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
+        stderr=subprocess.PIPE
     )
-    for line in process.stdout:
-        print(line, end='')  # Print capturé par Redirector
-    for line in process.stderr:
-        print(line, end='')  # Print capturé par Redirector
 
     # Exécution du script principal
     with open('main.py', 'r', encoding='utf-8') as file:
