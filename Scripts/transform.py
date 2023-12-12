@@ -70,7 +70,6 @@ def header_and_data_cleansing(header, data):
     # Nettoyage et mise en forme des en-têtes
     cleaned_header = [col.lower().replace('n°licence','n° licence').replace('\n', ' ').replace('nb.','nombre').strip() for col in header]
 
-    print(cleaned_header)
     # Création du DataFrame avec des en-têtes nettoyés
     df = pd.DataFrame(data, columns=cleaned_header)
     # Conversion des colonnes en chaînes et réinitialisation de l'index

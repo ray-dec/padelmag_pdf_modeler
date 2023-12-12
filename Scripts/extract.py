@@ -5,7 +5,7 @@ import urllib.request
 from bs4 import BeautifulSoup
 import requests
 
-def download_pdf_padel(categorie, soup,folder_path):
+def download_pdf_padel(categorie,folder_path):
     url_page = 'https://www.fft.fr/competition/padel/le-classement-padel'
     response = requests.get(url_page)
     soup = BeautifulSoup(response.text, 'html.parser')
@@ -15,6 +15,7 @@ def download_pdf_padel(categorie, soup,folder_path):
             filename = a.get_text(strip=True) + '.pdf'
             try:
                 urllib.request.urlretrieve(a['href'], folder_path+filename)
+                print(f'Le fichier {filename} a bien été téléchargé depuis le site {url_page}')
             except Exception as e:
                 print(f"Erreur lors du téléchargement : {e}")
             break

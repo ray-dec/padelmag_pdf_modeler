@@ -3,62 +3,80 @@ import pandas as pd
 import re, os, sys
 
 # Chemin vers les scripts spécifiques au projet
-project_scripts_path = '/content/drive/MyDrive/02 - Work/02 - Padel Mag/Scripts'
+project_path = './'
 
 # Convertir en chemin absolu (utile si le script est exécuté dans différents environnements)
-absolute_path = os.path.abspath(project_scripts_path)
+absolute_path = os.path.abspath(project_path)
 
 # Vérifier si le chemin existe déjà dans sys.path pour éviter les doublons
 if absolute_path not in sys.path:
     # Ajouter le chemin au début de sys.path
     sys.path.insert(0, absolute_path)
 
-from extract import extract_data_from_tables
-from transform import extract_date_and_sex, create_timestamp_gender_columns, header_and_data_cleansing
-from load import save_to_parquet
+from Scripts.extract import extract_data_from_tables,download_pdf_padel
+from Scripts.transform import extract_date_and_sex, create_timestamp_gender_columns, header_and_data_cleansing
+from Scripts.load import save_to_parquet
 
-def main(year):
-    folder_path = f'/content/drive/MyDrive/02 - Work/02 - Padel Mag/01 - Raw/{year}'
+
+def main() :
+
+    folder_path ='./02 - WIP/'    
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path, exist_ok=True)
+
     dataframes = []
 
     schema_type = ['rang', 'nom', 'prenom', 'nationalité', 'n° licence', 'points', 'assimilation', 'nombre de tournois joues', 'ligue', 'code club', 'club','sexe','date']
+    download_pdf_padel('DAMES',folder_path)
+    download_pdf_padel('MESSIEURS', folder_path)
 
     for filename in os.listdir(folder_path):
+
         if filename.endswith('.pdf'):
             file_path = os.path.join(folder_path, filename)
-            print(f'Traitement du fichier {filename}')
-            
 
-            # Extraction depuis les fichiers PDFs
-            all_tables = extract_data_from_tables(file_path)
-          
-            
-            # Modification des tables
-            df = header_and_data_cleansing(all_tables[0], all_tables[1:])
-            date, sex = extract_date_and_sex(filename)
-            df = create_timestamp_gender_columns(df, date, sex)
-            df =  df.reset_index(drop=True)
+            if os.path.exists(folder_path+'raw/'+filename):
+                os.remove(file_path)
+                print(f'Le fichier {filename} a déjà été intégré.')
 
-            for col in schema_type:
-                if col not in df.columns:
-                    df[col] = pd.NA
-                    # Assurer l'ordre des colonnes
-            
-            df = df[schema_type]
-            dataframes.append(df)
+            else :        
+                print(f'Traitement du fichier {filename}')
 
-    final_df = pd.concat(dataframes, ignore_index=True)
+                # Extraction depuis les fichiers PDFs 
+                all_tables = extract_data_from_tables(file_path)
+                print("Fin de l'extraction des données depuis le PDF. \nLancement du cleaning...")
+
+                # Modification des tables
+                df = header_and_data_cleansing(all_tables[0], all_tables[1:])
+                date, sex = extract_date_and_sex(filename)
+                df = create_timestamp_gender_columns(df, date, sex)
+                df =  df.reset_index(drop=True)
+
+                for col in schema_type:
+                    if col not in df.columns:
+                        df[col] = pd.NA
+                        # Assurer l'ordre des colonnes
+                
+                df = df[schema_type]
+                dataframes.append(df)
+
+                if not os.path.exists(folder_path+'raw/'):
+                    os.makedirs(folder_path+'raw/', exist_ok=True)
+                print(f"Fin du cleaning. Le fichier PDF a été archivé dans{folder_path+'raw/'}")
+                os.replace(file_path,folder_path+'raw/'+filename)
     
-    # Vérifier si le dossier existe, sinon le créer
-    wip_folder_path = '/content/drive/MyDrive/02 - Work/02 - Padel Mag/02 - WIP'
+    
+    database = pd.read_parquet(folder_path+'database.parquet')
+    dataframes.append(database)
+    final_df = pd.concat(dataframes, ignore_index=True)
+    final_df.drop_duplicates(inplace=True)
 
-    if not os.path.exists(wip_folder_path):
-        os.makedirs(wip_folder_path, exist_ok=True)
-
-    # Chemin complet du fichier de sortie
-    output_filepath = f'{wip_folder_path}/db_{year}.parquet'
     # Chargement final dans le fichier dédié
+    output_filepath = folder_path+'database.parquet'
     save_to_parquet(final_df, output_filepath,schema_type)
 
 if __name__ == "__main__":
     main()
+
+
+
